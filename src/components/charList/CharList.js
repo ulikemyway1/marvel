@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, createRef } from 'react';
 
 import './charList.scss';
 import Spinner from '../Spinner/Spinner';
@@ -16,10 +16,16 @@ class CharList extends Component {
             isLoadingMore: false,
         }
         this.marvelService = new MarvelService();
+        this.elements = [];
     }
 
     componentDidMount() {
         this.loadCharacters();
+       
+    }
+
+    createRef = (elem) => {
+        this.elements.push(elem);        
     }
 
     onCharListLoaded = (newCharacters) => {
@@ -51,11 +57,17 @@ class CharList extends Component {
 
     }
 
+    onClickHandler = (id) => {
+        this.props.charUpdateHandler(id);
+        this.elements.forEach((element) => element.classList.remove('char__item_selected'))
+
+    }
+
     render = () => {
         const { loading, characters, error } = this.state;
         const loader = loading ? <Spinner /> : null;
         const errorMessage = error ? 'Error' : null;
-        const charList = !(loading || error) ? <View characters={characters} onClickHandler={this.props.charUpdateHandler} onLoadMoreButtonClick={this.onLoadMoreButtonClick} buttonDisable={this.state.isLoadingMore} /> : null;
+        const charList = !(loading || error) ? <View createRefCallBack = {this.createRef} characters={characters} onClickHandler={this.onClickHandler} onLoadMoreButtonClick={this.onLoadMoreButtonClick} buttonDisable={this.state.isLoadingMore} /> : null;
         return (
             <>
                 {loader}
@@ -68,12 +80,17 @@ class CharList extends Component {
 }
 
 
-const View = ({ characters, onClickHandler, onLoadMoreButtonClick, buttonDisable }) => {
+const View = ({ createRefCallBack, characters, onClickHandler, onLoadMoreButtonClick, buttonDisable }) => {
     const charactersList = characters.map(character => {
         const noImage = character.thumbnail.includes('not_available');
         const objectFit = { 'objectFit': noImage ? 'contain' : 'cover' };
+        const onClick = (e) => {
+            onClickHandler(character.id);
+            const li = e.target.closest('li');
+            li.classList.add('char__item_selected');
+        }
         return (
-            <li className="char__item" key={character.id} onClick={() => onClickHandler(character.id)}>
+            <li ref = {createRefCallBack} className="char__item" tabIndex="0" key={character.id} onClick={onClick}>
                 <img src={character.thumbnail} alt={character.name} style={objectFit} />
                 <div className="char__name">{character.name}</div>
             </li>
