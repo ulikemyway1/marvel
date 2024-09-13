@@ -1,80 +1,73 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 import MarvelService from '../services/MarvelService';
 import Spinner from '../Spinner/Spinner';
 import ErrorrMessage from '../ErrorMessage/ErrorMessage';
-class RandomChar extends Component {
+const RandomChar = () => {
 
-    state = {
-        character: {},
-        loading: true,
-        error: false,
+    const [character, setCharacter] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    const marvelService = new MarvelService();
+
+    const onCharLoaded = (character) => {
+
+        setCharacter(character);
+        setIsLoading(false)
     }
 
-    marvelService = new MarvelService();
-
-    onCharLoaded = (character) => {
-        this.setState({
-            character,
-            loading: false
-        },)
+    const onError = () => {
+        setHasError(true);
+        setIsLoading(false);
     }
 
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true,
-        })
-    }
+    useEffect(() => updateCharacter(), [])
 
-    componentDidMount() {
-        this.updateCharacter();
-    }
-
-    updateCharacter = () => {
-        if (this.state.error) {
-            this.setState({error: false})
+    const updateCharacter = () => {
+        if (hasError) {
+            setHasError(false)
         }
-        this.setState({loading: true})
+        setIsLoading(true)
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
-        this.marvelService.getCharacter(id).then(this.onCharLoaded).catch(this.onError);
+        marvelService.getCharacter(id).then(onCharLoaded).catch(onError);
     }
 
-    render() {
-        const { character, loading, error } = this.state;
-        const characterView = !(loading || error) ?  <View character={character} /> : null;
-        const loader = loading? <Spinner /> : null;
-        const errorMessage = error? <ErrorrMessage /> : null;
-        return (
-            <div className="randomchar">
-               {loader}
-               {characterView}
-               {errorMessage}
-                <div className="randomchar__static">
-                    <p className="randomchar__title">
-                        Random character for today!<br />
-                        Do you want to get to know him better?
-                    </p>
-                    <p className="randomchar__title">
-                        Or choose another one
-                    </p>
-                    <button className="button button__main" onClick={this.updateCharacter}>
-                        <div className="inner" >try it</div>
-                    </button>
-                    <img src={mjolnir} alt="mjolnir" className="randomchar__decoration" />
-                </div>
+
+
+    const characterView = !(isLoading || hasError) ? <View character={character} /> : null;
+    const loader = isLoading ? <Spinner /> : null;
+    const errorMessage = hasError ? <ErrorrMessage /> : null;
+    return (
+        <div className="randomchar">
+            {loader}
+            {characterView}
+            {errorMessage}
+            <div className="randomchar__static">
+                <p className="randomchar__title">
+                    Random character for today!<br />
+                    Do you want to get to know him better?
+                </p>
+                <p className="randomchar__title">
+                    Or choose another one
+                </p>
+                <button className="button button__main" onClick={updateCharacter}>
+                    <div className="inner" >try it</div>
+                </button>
+                <img src={mjolnir} alt="mjolnir" className="randomchar__decoration" />
             </div>
-        )
-    }
+        </div>
+    )
+
 }
 
-const View = ({character}) => {
+const View = ({ character }) => {
     const { name, description, thumbnail, homepage, wiki } = character;
     const imgNotFound = thumbnail.includes('not_available');
     return (
         <div className="randomchar__block">
-            <img src={thumbnail} alt="Random character" className={imgNotFound ? 'randomchar__img-not-found' :'randomchar__img'} />
+            <img src={thumbnail} alt="Random character" className={imgNotFound ? 'randomchar__img-not-found' : 'randomchar__img'} />
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">

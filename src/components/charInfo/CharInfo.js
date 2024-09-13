@@ -1,57 +1,41 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import './charInfo.scss';
 import MarvelService from '../services/MarvelService';
 import Spinner from '../Spinner/Spinner';
 
-class CharInfo extends Component {
+const CharInfo = ({charID}) => {
 
-    constructor(props) {
-        super(props);
-        this.marvelService = new MarvelService();
-        this.state = {
-            char: null,
-            loading: true,
-        }
-    }
 
-    componentDidMount() {
-        this.updateChar(this.props.charID);
-    }
+    const marvelService = new MarvelService();
+    const [char, setChar] = useState(null);
+    const [isLoading, setIsLoading] = useState(true)
 
-    updateChar = (id) => {
+    useEffect(() => updateChar(charID), [charID]);
+
+   const updateChar = (id) => {
         if (!id) id = '1010912';
-        this.setState({
-            loading: true,
-        })
-        this.marvelService.getCharacter(id).then(this.onCharUpdate).catch(this.onError);
+        setIsLoading(true);
+        marvelService.getCharacter(id).then(onCharUpdate).catch(onError);
     }
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.charID !== this.props.charID) {
-            this.updateChar(this.props.charID);
-        }
+  const  onCharUpdate = (charInfo) => {
+        setChar(charInfo);
+        setIsLoading(false);
     }
 
-    onCharUpdate = (charInfo) => {
-        this.setState({
-            char: charInfo,
-            loading: false,
-        })
-    }
-
-    onError = () => {
+   const onError = () => {
         console.log('Can not fetch')
     }
 
-    render = () => {
+
         return (
 
             <div className="char__info">
-                {this.state.loading ? <Spinner /> : <View props={this.state.char} />}
+                {isLoading ? <Spinner /> : <View props={char} />}
             </div>
 
         )
-    }
+
 
 }
 
@@ -60,7 +44,7 @@ export default CharInfo;
 const View = ({ props }) => {
     let comicsList = 'No comics';
     if (props.comics.length > 0)
-    props.comics.map((comic, index) => {
+    comicsList = props.comics.map((comic, index) => {
         while (index < 10) 
         return (
             <li key={index} className="char__comics-item">

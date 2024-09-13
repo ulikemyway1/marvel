@@ -1,87 +1,76 @@
-import { Component, createRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import './charList.scss';
 import Spinner from '../Spinner/Spinner';
 import MarvelService from '../services/MarvelService';
 
-class CharList extends Component {
+const CharList = ({charUpdateHandler}) => {
 
-    constructor(props) {
-        super(props)
-        this.state = {
-            loading: true,
-            characters: [],
-            error: false,
-            offset: 0,
-            isLoadingMore: false,
-        }
-        this.marvelService = new MarvelService();
-        this.elements = [];
+    const elements = [];
+    const marvelService = new MarvelService();
+    const [isLoading, setIsLoading] = useState(true);
+    const [characters, setCharacters] = useState([]);
+    const [isError, setIsError] = useState(false);
+    const [offset, setOffset] = useState(0);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    useEffect(loadCharacters, [])
+    useEffect(loadCharacters, [offset])
+
+    const refs = useRef([]);
+
+    const createRef = (ref, i) => {
+        refs.current[i] = ref;
     }
 
-    componentDidMount() {
-        this.loadCharacters();
-       
+    const onCharListLoaded = (newCharacters) => {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+        setCharacters([...characters, ...newCharacters])
     }
 
-    createRef = (elem) => {
-        this.elements.push(elem);        
+    const onLoadMoreButtonClick = () => {
+        setOffset(offset => offset + 9);
+        setIsLoadingMore(true)
     }
 
-    onCharListLoaded = (newCharacters) => {
-        this.setState(({ characters }) => ({
-            loading: false,
-            isLoadingMore: false,
-            characters: [...characters, ...newCharacters]
-        }))
+    function loadCharacters() {
+        marvelService.getAllCharacters(offset).then(onCharListLoaded).catch(onError);
     }
 
-    onLoadMoreButtonClick = () => {
-        this.setState(({ offset }) => ({
-            offset: offset + 9,
-            isLoadingMore: true,
-        }), () => this.loadCharacters())
+    const onError = () => {
+        setIsLoading(false);
+        setCharacters(null);
+        setIsError(true);
     }
 
-    loadCharacters = () => {
-        const offset = this.state.offset;
-        this.marvelService.getAllCharacters(offset).then(this.onCharListLoaded).catch(this.onError);
-    }
-
-    onError = () => {
-        this.setState({
-            loading: false,
-            characters: null,
-            erorr: true
-        })
+    const onClickHandler = (id) => {
+        charUpdateHandler(id);
+        refs.current.forEach((element) => element.classList.remove('char__item_selected'))
 
     }
 
-    onClickHandler = (id) => {
-        this.props.charUpdateHandler(id);
-        this.elements.forEach((element) => element.classList.remove('char__item_selected'))
+    const loader = isLoading ? <Spinner /> : null;
+    const errorMessage = isError ? 'Error' : null;
+    const charList = !(isLoading || isError) ?
+        <View createRefCallBack={createRef}
+            characters={characters}
+            onClickHandler={onClickHandler}
+            onLoadMoreButtonClick={onLoadMoreButtonClick}
+            buttonDisable={isLoadingMore} /> : null;
+    return (
+        <>
+            {loader}
+            {errorMessage}
+            {charList}
+        </>
+    )
 
-    }
-
-    render = () => {
-        const { loading, characters, error } = this.state;
-        const loader = loading ? <Spinner /> : null;
-        const errorMessage = error ? 'Error' : null;
-        const charList = !(loading || error) ? <View createRefCallBack = {this.createRef} characters={characters} onClickHandler={this.onClickHandler} onLoadMoreButtonClick={this.onLoadMoreButtonClick} buttonDisable={this.state.isLoadingMore} /> : null;
-        return (
-            <>
-                {loader}
-                {errorMessage}
-                {charList}
-            </>
-        )
-
-    }
 }
 
 
 const View = ({ createRefCallBack, characters, onClickHandler, onLoadMoreButtonClick, buttonDisable }) => {
-    const charactersList = characters.map(character => {
+    const charactersList = characters.map((character, index) => {
         const noImage = character.thumbnail.includes('not_available');
         const objectFit = { 'objectFit': noImage ? 'contain' : 'cover' };
         const onClick = (e) => {
@@ -90,7 +79,7 @@ const View = ({ createRefCallBack, characters, onClickHandler, onLoadMoreButtonC
             li.classList.add('char__item_selected');
         }
         return (
-            <li ref = {createRefCallBack} className="char__item" tabIndex="0" key={character.id} onClick={onClick}>
+            <li ref={(e) => createRefCallBack(e, index)} className="char__item" tabIndex="0" key={character.id} onClick={onClick}>
                 <img src={character.thumbnail} alt={character.name} style={objectFit} />
                 <div className="char__name">{character.name}</div>
             </li>
