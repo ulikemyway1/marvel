@@ -2,17 +2,15 @@ import { useState, useRef, useEffect } from 'react';
 
 import './charList.scss';
 import Spinner from '../Spinner/Spinner';
-import MarvelService from '../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 const CharList = ({charUpdateHandler}) => {
 
     const elements = [];
-    const marvelService = new MarvelService();
-    const [isLoading, setIsLoading] = useState(true);
+    const {getAllCharacters, isLoading, hasError, clearError } =  useMarvelService();
     const [characters, setCharacters] = useState([]);
-    const [isError, setIsError] = useState(false);
     const [offset, setOffset] = useState(0);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false)
 
     useEffect(loadCharacters, [])
     useEffect(loadCharacters, [offset])
@@ -24,8 +22,6 @@ const CharList = ({charUpdateHandler}) => {
     }
 
     const onCharListLoaded = (newCharacters) => {
-        setIsLoading(false);
-        setIsLoadingMore(false);
         setCharacters([...characters, ...newCharacters])
     }
 
@@ -35,15 +31,10 @@ const CharList = ({charUpdateHandler}) => {
     }
 
     function loadCharacters() {
-        marvelService.getAllCharacters(offset).then(onCharListLoaded).catch(onError);
+        getAllCharacters(offset).then(onCharListLoaded);
     }
 
-    const onError = () => {
-        setIsLoading(false);
-        setCharacters(null);
-        setIsError(true);
-    }
-
+   
     const onClickHandler = (id) => {
         charUpdateHandler(id);
         refs.current.forEach((element) => element.classList.remove('char__item_selected'))
@@ -51,8 +42,8 @@ const CharList = ({charUpdateHandler}) => {
     }
 
     const loader = isLoading ? <Spinner /> : null;
-    const errorMessage = isError ? 'Error' : null;
-    const charList = !(isLoading || isError) ?
+    const errorMessage = hasError ? 'Error' : null;
+    const charList = !(isLoading || hasError) ?
         <View createRefCallBack={createRef}
             characters={characters}
             onClickHandler={onClickHandler}

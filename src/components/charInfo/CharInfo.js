@@ -1,42 +1,34 @@
 import { useState, useEffect } from 'react';
 import './charInfo.scss';
-import MarvelService from '../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../Spinner/Spinner';
 
-const CharInfo = ({charID}) => {
+const CharInfo = ({ charID }) => {
 
 
-    const marvelService = new MarvelService();
+    const { getCharacter, isLoading, hasError, clearError } = useMarvelService();
     const [char, setChar] = useState(null);
-    const [isLoading, setIsLoading] = useState(true)
+    const [itIsIntialLoading, setItIsInitialLodaing] = useState(true);
 
     useEffect(() => updateChar(charID), [charID]);
 
-   const updateChar = (id) => {
+    const updateChar = (id) => {
         if (!id) id = '1010912';
-        setIsLoading(true);
-        marvelService.getCharacter(id).then(onCharUpdate).catch(onError);
+        getCharacter(id).then(onCharUpdate);
     }
 
-  const  onCharUpdate = (charInfo) => {
+    const onCharUpdate = (charInfo) => {
         setChar(charInfo);
-        setIsLoading(false);
+        setItIsInitialLodaing(false);
     }
 
-   const onError = () => {
-        console.log('Can not fetch')
-    }
+    return (
 
+        <div className="char__info">
+            {(itIsIntialLoading || isLoading) ? <Spinner /> : <View props={char} />}
+        </div>
 
-        return (
-
-            <div className="char__info">
-                {isLoading ? <Spinner /> : <View props={char} />}
-            </div>
-
-        )
-
-
+    )
 }
 
 export default CharInfo;
@@ -44,15 +36,15 @@ export default CharInfo;
 const View = ({ props }) => {
     let comicsList = 'No comics';
     if (props.comics.length > 0)
-    comicsList = props.comics.map((comic, index) => {
-        while (index < 10) 
-        return (
-            <li key={index} className="char__comics-item">
-                {comic.name}
-            </li>
-        )
-        return null;
-    })
+        comicsList = props.comics.map((comic, index) => {
+            while (index < 10)
+                return (
+                    <li key={index} className="char__comics-item">
+                        {comic.name}
+                    </li>
+                )
+            return null;
+        })
 
     return (
         <>
@@ -75,7 +67,7 @@ const View = ({ props }) => {
             </div>
             <div className="char__comics">Comics:</div>
             <ul className="char__comics-list">
-             {comicsList}
+                {comicsList}
             </ul>
         </>
     )

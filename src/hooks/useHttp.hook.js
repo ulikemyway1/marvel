@@ -1,10 +1,10 @@
-import { useCallback, useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 
-export default function useHttp(url, method = 'GET', body = null, headers = { 'Content-Type': 'application/json' }) {
+export default function useHttp() {
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(null);
 
-    const request = useCallback(async () => {
+    const request = useCallback(async (url, method = 'GET', body = null, headers = { 'Content-Type': 'application/json' }) => {
 
         setIsLoading(true);
 
@@ -32,6 +32,6 @@ export default function useHttp(url, method = 'GET', body = null, headers = { 'C
 
     const clearError = useCallback(() => setHasError(false), []);
 
-    return {isLoading, hasError, request, clearError}
+    return { isLoading, hasError, request, clearError }
 
 }
