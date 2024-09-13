@@ -5,6 +5,7 @@ import CharList from "../charList/CharList";
 import CharInfo from "../charInfo/CharInfo";
 import ErrorBoundary from '../errorBoundary/ErrorBoundary';
 import decoration from '../../resources/img/vision.png';
+import ComicsList from '../comicsList/ComicsList';
 
 const App = () => {
 
@@ -25,6 +26,7 @@ const App = () => {
                     <ErrorBoundary>
                         <CharInfo charID={selectedCharID} />
                     </ErrorBoundary>
+                    <ComicsList/>
 
                 </div>
                 <img className="bg-decoration" src={decoration} alt="vision" />
