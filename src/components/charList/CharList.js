@@ -4,13 +4,14 @@ import './charList.scss';
 import Spinner from '../Spinner/Spinner';
 import useMarvelService from '../../services/MarvelService';
 
-const CharList = ({charUpdateHandler}) => {
+const CharList = ({ charUpdateHandler }) => {
 
     console.log('render')
-    const {getAllCharacters, isLoading, hasError, clearError } =  useMarvelService();
+    const { getAllCharacters, isLoading, hasError, clearError } = useMarvelService();
     const [characters, setCharacters] = useState([]);
     const [offset, setOffset] = useState(0);
     const [isLoadingMore, setIsLoadingMore] = useState(false)
+    const [itIsIntialLoading, setItIsInitialLodaing] = useState(true);
 
     useEffect(loadCharacters, [])
     useEffect(loadCharacters, [offset])
@@ -22,7 +23,9 @@ const CharList = ({charUpdateHandler}) => {
     }
 
     const onCharListLoaded = (newCharacters) => {
-        setCharacters([...characters, ...newCharacters])
+        setItIsInitialLodaing(false);
+        setCharacters([...characters, ...newCharacters]);
+        setIsLoadingMore(false);
     }
 
     const onLoadMoreButtonClick = () => {
@@ -34,7 +37,7 @@ const CharList = ({charUpdateHandler}) => {
         getAllCharacters(offset).then(onCharListLoaded);
     }
 
-   
+
     const onClickHandler = (id) => {
         charUpdateHandler(id);
         refs.current.forEach((element) => element.classList.remove('char__item_selected'))
@@ -43,15 +46,16 @@ const CharList = ({charUpdateHandler}) => {
 
     const loader = isLoading ? <Spinner /> : null;
     const errorMessage = hasError ? 'Error' : null;
-    const charList = !(isLoading || hasError) ?
+    const charList = !(itIsIntialLoading || hasError) && characters.length > 0 ?
         <View createRefCallBack={createRef}
             characters={characters}
             onClickHandler={onClickHandler}
             onLoadMoreButtonClick={onLoadMoreButtonClick}
-            buttonDisable={isLoadingMore} /> : null;
+            buttonDisable={isLoadingMore}
+            loader={loader} /> : null;
+
     return (
         <>
-            {loader}
             {errorMessage}
             {charList}
         </>
@@ -60,7 +64,7 @@ const CharList = ({charUpdateHandler}) => {
 }
 
 
-const View = ({ createRefCallBack, characters, onClickHandler, onLoadMoreButtonClick, buttonDisable }) => {
+const View = ({ createRefCallBack, characters, onClickHandler, onLoadMoreButtonClick, buttonDisable, loader }) => {
     const charactersList = characters.map((character, index) => {
         const noImage = character.thumbnail.includes('not_available');
         const objectFit = { 'objectFit': noImage ? 'contain' : 'cover' };
@@ -82,8 +86,9 @@ const View = ({ createRefCallBack, characters, onClickHandler, onLoadMoreButtonC
             <ul className="char__grid">
                 {charactersList}
             </ul>
+            {loader}
             <button className="button button__main button__long" onClick={onLoadMoreButtonClick} disabled={buttonDisable}>
-                <div className="inner" >load more</div>
+                <div className="inner"> load more </div>
             </button>
         </div>
     )
