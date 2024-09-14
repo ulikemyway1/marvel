@@ -6,7 +6,7 @@ import useMarvelService from '../../services/MarvelService';
 
 const CharList = ({charUpdateHandler}) => {
 
-    const elements = [];
+    console.log('render')
     const {getAllCharacters, isLoading, hasError, clearError } =  useMarvelService();
     const [characters, setCharacters] = useState([]);
     const [offset, setOffset] = useState(0);
