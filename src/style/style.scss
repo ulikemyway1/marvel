@@ -80,3 +80,21 @@ main {
         opacity: 1
     }
 }
+
+.not-found {
+    display: flex;
+    place-content: center center;
+    height: 600px;
+
+    img {
+        height: 100%;
+        border-radius: 12px;
+    }
+
+    &_wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}
