@@ -6,8 +6,7 @@ import useMarvelService from '../../services/MarvelService';
 
 const CharList = ({ charUpdateHandler }) => {
 
-    console.log('render')
-    const { getAllCharacters, isLoading, hasError, clearError } = useMarvelService();
+    const { getAllCharacters, isLoading, hasError } = useMarvelService();
     const [characters, setCharacters] = useState([]);
     const [offset, setOffset] = useState(0);
     const [isLoadingMore, setIsLoadingMore] = useState(false)
@@ -56,6 +55,7 @@ const CharList = ({ charUpdateHandler }) => {
 
     return (
         <>
+            {itIsIntialLoading ? loader : null}
             {errorMessage}
             {charList}
         </>
