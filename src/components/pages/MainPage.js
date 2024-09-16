@@ -16,14 +16,14 @@ const MainPage = () => {
 
     return (
         <>
-        <RandomChar />
-                <div className="char__content">
-                    <CharList charUpdateHandler={updateCharIdHandler} />
-                    <ErrorBoundary>
-                        <CharInfo charID={selectedCharID} />
-                    </ErrorBoundary>
-                </div>
-                <img className="bg-decoration" src={decoration} alt="vision" />
+            <RandomChar />
+            <div className="char__content">
+                <CharList charUpdateHandler={updateCharIdHandler} />
+                <ErrorBoundary>
+                    <CharInfo charID={selectedCharID} />
+                </ErrorBoundary>
+            </div>
+            <img className="bg-decoration" src={decoration} alt="vision" />
         </>
     )
 }

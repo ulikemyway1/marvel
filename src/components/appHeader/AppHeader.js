@@ -21,7 +21,7 @@ const AppHeader = () => {
                         style={({ isActive }) => ({
                             color: isActive ? '#9F0013' : 'black'
                         })}
-                        end>Comics</NavLink></li>
+                        >Comics</NavLink></li>
                 </ul>
             </nav>
         </header>
